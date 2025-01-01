@@ -1,0 +1,5 @@
+{
+    find_program_msvc_arch_x64_plat_windows_checktoolcxx = {
+        ["cl.exe"] = "cl.exe"
+    }
+}

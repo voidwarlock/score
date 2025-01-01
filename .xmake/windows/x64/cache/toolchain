@@ -1,0 +1,12 @@
+{
+    tool_target_test_windows_x64_cxx = {
+        toolchain_info = {
+            plat = "windows",
+            cachekey = "msvc_arch_x64_plat_windows",
+            name = "msvc",
+            arch = "x64"
+        },
+        program = "cl.exe",
+        toolname = "cl"
+    }
+}

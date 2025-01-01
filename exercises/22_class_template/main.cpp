@@ -8,10 +8,9 @@ struct Tensor4D {
     T *data;
 
     Tensor4D(unsigned int const shape_[4], T const *data_) {
-        unsigned int size = 1;
         // TODO: 填入正确的 shape 并计算 size
         std::copy(shape_, shape_ + 4, this->shape);
-        size = shape_[0] * shape_[1] * shape_[2] * shape_[3];
+        unsigned int size = shape_[0] * shape_[1] * shape_[2] * shape_[3];
         data = new T[size];
         memcpy(data, data_, size * sizeof(T));
     }
@@ -28,41 +27,34 @@ struct Tensor4D {
     // `others` 长度为 1 但 `this` 长度不为 1 的维度将发生广播计算。
     // 例如，`this` 形状为 `[1, 2, 3, 4]`，`others` 形状为 `[1, 2, 1, 4]`，
     // 则 `this` 与 `others` 相加时，3 个形状为 `[1, 2, 1, 4]` 的子张量各自与 `others` 对应项相加。
+// 实现单向广播的加法
     Tensor4D &operator+=(Tensor4D const &others) {
-        // TODO: 实现单向广播的加法
-        int num = 0;
-        unsigned int place[4] = {1,1,1,1};
-        unsigned int change[4] = {0,0,0,1};
-        unsigned int other_change[4] = {0,0,0,1};
-        for(int i=0; i<4; i++)
-        {
-
-            if(others.shape[i]!=shape[i] && others.shape[i]==1)
-            {
-                num++;
-                place[i]-=1;
-                
+        // 检查形状兼容性
+        for (int i = 0; i < 4; ++i) {
+            if (this->shape[i] != others.shape[i] && others.shape[i] != 1) {
+                throw std::invalid_argument("Incompatible shapes for broadcasting");
             }
         }
-        for(int i=2; i>=0; i--)
-        {
-            change[i] = change[i+1]*shape[i+1];
-            other_change[i] = other_change[i+1]*others.shape[i+1];
-        }
-        for(unsigned int x=0; x<shape[0]; x++)
-        {
-            for(unsigned int y=0; y<shape[1]; y++)
-            {
-                for(unsigned int a=0; a<shape[2]; a++)
-                {
-                    for(unsigned int b=0; b<shape[3]; b++)
-                    {
-                        data[change[0]*x+change[1]*y+change[2]*a+change[3]*b] += others.data[other_change[0]*x*place[0]+other_change[1]*y*place[1]+other_change[2]*a*place[2]+other_change[3]*b*place[3]];
+
+        // 遍历并应用广播规则
+        unsigned int strides[4] = {1, this->shape[3], this->shape[2] * this->shape[3], this->shape[1] * this->shape[2] * this->shape[3]};
+        unsigned int other_strides[4] = {1, others.shape[3], others.shape[2] * others.shape[3], others.shape[1] * others.shape[2] * others.shape[3]};
+
+        for (unsigned int i = 0; i < this->shape[0]; ++i) {
+            for (unsigned int j = 0; j < this->shape[1]; ++j) {
+                for (unsigned int k = 0; k < this->shape[2]; ++k) {
+                    for (unsigned int l = 0; l < this->shape[3]; ++l) {
+                        unsigned int idx = i * strides[3] + j * strides[2] + k * strides[1] + l * strides[0];
+                        unsigned int other_idx = 
+                            ((others.shape[0] == 1 ? 0 : i) * other_strides[3]) +
+                            ((others.shape[1] == 1 ? 0 : j) * other_strides[2]) +
+                            ((others.shape[2] == 1 ? 0 : k) * other_strides[1]) +
+                            ((others.shape[3] == 1 ? 0 : l) * other_strides[0]);
+                        this->data[idx] += others.data[other_idx];
                     }
                 }
             }
         }
-        
 
         return *this;
     }

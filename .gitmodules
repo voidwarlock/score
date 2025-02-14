@@ -3,4 +3,4 @@
 	url = https://github.com/LearningInfiniTensor/learning-cxx.git
 [submodule "TinyInfiniTensor"]
     path = TinyInfiniTensor
-    url = https://github.com/LearningInfiniTensor/TinyInfiniTensor.git
+    url = https://github.com/voidwarlock/TinyInfiniTensor.git
